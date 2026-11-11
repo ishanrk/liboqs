@@ -5,6 +5,16 @@
 
 #include <oqs/oqs.h>
 
+{% if family == 'sdith' %}
+#if defined(OQS_ENABLE_SIG_SDITH)
+/** reuse one temporary buffer allocated on first use
+ * off by default and used memory is wiped after each call
+ * OQS_destroy() frees the buffer and must run after active calls finish
+ */
+OQS_API void OQS_SIG_sdith_set_workspace_reuse(bool enabled);
+#endif
+{% endif %}
+
 {% for scheme in schemes -%}
 {%- set default_impl = scheme['metadata']['implementations'] | selectattr("name", "equalto", scheme['default_implementation']) | first -%}
 #if defined(OQS_ENABLE_SIG_{{ family }}_{{ scheme['scheme'] }}) {%- if 'alias_scheme' in scheme %} || defined(OQS_ENABLE_SIG_{{ family }}_{{ scheme['alias_scheme'] }}){%- endif %}

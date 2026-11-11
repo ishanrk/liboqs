@@ -5,6 +5,14 @@
 
 #include <oqs/oqs.h>
 
+#if defined(OQS_ENABLE_SIG_SDITH)
+/** reuse one temporary buffer allocated on first use
+ * off by default and used memory is wiped after each call
+ * OQS_destroy() frees the buffer and must run after active calls finish
+ */
+OQS_API void OQS_SIG_sdith_set_workspace_reuse(bool enabled);
+#endif
+
 #if defined(OQS_ENABLE_SIG_sdith_l1_gf2_short)
 #define OQS_SIG_sdith_l1_gf2_short_length_public_key 70
 #define OQS_SIG_sdith_l1_gf2_short_length_secret_key 147

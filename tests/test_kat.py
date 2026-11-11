@@ -41,6 +41,17 @@ def test_sig(sig_name):
     assert(kats[sig_name]['single'] == h256.hexdigest())
 
 @helpers.filtered_test
+@pytest.mark.parametrize('sig_name', [name for name in helpers.available_sigs_by_name() if name.startswith('SDitH3-')])
+def test_sdith_workspace_reuse(sig_name):
+    if not helpers.is_sig_enabled_by_name(sig_name):
+        pytest.skip('Not enabled')
+    output = helpers.run_subprocess(
+        [helpers.path_to_executable('kat_sig'), sig_name], env={'OQS_TEST_SDITH_REUSE': '1'},
+    )
+    digest = sha256(output.replace('\r\n', '\n').encode()).hexdigest()
+    assert helpers.get_kats('sig')[sig_name]['single'] == digest
+
+@helpers.filtered_test
 @pytest.mark.parametrize('sig_stfl_name', helpers.available_sig_stfls_by_name())
 def test_sig_stfl(sig_stfl_name):
     kats = helpers.get_kats("sig_stfl")

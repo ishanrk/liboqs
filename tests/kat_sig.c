@@ -1403,6 +1403,10 @@ cleanup:
 int main(int argc, char **argv) {
 	OQS_init();
 
+#if defined(OQS_ENABLE_SIG_SDITH)
+	OQS_SIG_sdith_set_workspace_reuse(getenv("OQS_TEST_SDITH_REUSE") != NULL);
+#endif
+
 	if (argc < 2 || argc > 3 || (argc == 3 && strcmp(argv[2], "--all"))) {
 		fprintf(stderr, "Usage: kat_sig algname [--all]\n");
 		fprintf(stderr, "  algname: ");

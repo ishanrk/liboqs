@@ -85,6 +85,11 @@ if(OQS_ENABLE_SIG_SQISIGN)
 endif()
 ##### OQS_COPY_FROM_UPSTREAM_FRAGMENT_ADD_ALG_OBJECTS_END
 
+# keep this outside the generated section so sdith imports preserve it
+if(OQS_ENABLE_SIG_SDITH)
+    list(APPEND SIG_OBJS sig/sdith/sdith_workspace.c)
+endif()
+
 # SDitH is imported upstream code that is not yet free of compiler warnings
 # This prevents those warnings from being treated as errors and blocking CI
 # In the future, we hope to remove this once the upstream code is cleaned up

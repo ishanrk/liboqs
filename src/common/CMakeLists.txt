@@ -112,6 +112,10 @@ add_library(internal OBJECT ${AES_IMPL} aes/aes.c
                             common.c
                             rand/rand_nist.c)
 set_property(TARGET internal PROPERTY C_VISIBILITY_PRESET default)
+if(OQS_ENABLE_SIG_SDITH)
+    # shared library tests must use liboqs's OQS_destroy() to free the cache
+    target_compile_definitions(internal PRIVATE OQS_INTERNAL_TEST_LIBRARY)
+endif()
 
 if(${OQS_USE_OPENSSL})
     target_include_directories(common PRIVATE ${OPENSSL_INCLUDE_DIR})

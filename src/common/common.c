@@ -7,6 +7,10 @@
 
 #include <oqs/common.h>
 
+#if defined(OQS_ENABLE_SIG_SDITH) && !defined(OQS_INTERNAL_TEST_LIBRARY)
+#include "../sig/sdith/sdith_workspace.h"
+#endif
+
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -250,11 +254,16 @@ OQS_API const char *OQS_version(void) {
 	return OQS_VERSION_TEXT;
 }
 
+#if !defined(OQS_INTERNAL_TEST_LIBRARY)
 OQS_API void OQS_destroy(void) {
+#if defined(OQS_ENABLE_SIG_SDITH)
+	oqs_sdith_workspace_destroy();
+#endif
 #if defined(OQS_USE_OPENSSL)
 	oqs_ossl_destroy();
 #endif
 }
+#endif
 
 OQS_API int OQS_MEM_secure_bcmp(const void *a, const void *b, size_t len) {
 	/* Assume CHAR_BIT = 8 */

@@ -10,6 +10,7 @@
 
 #include "sdith_signature.h"
 #include "api.h"
+#include "../sdith_workspace.h"
 
 
 OQS_STATUS crypto_sign_keypair(uint8_t* public_key, uint8_t* secret_key) {
@@ -43,26 +44,18 @@ OQS_STATUS crypto_sign_sign(
 	size_t message_len,
 	const uint8_t *secret_key)
 {
-  // TODO: there is an opportunity to optimize this by reusing the allocated tmp/entropy space
-  // when repeatedly signing/verifying. Tracked in liboqs as:
-  // https://github.com/open-quantum-safe/liboqs/issues/2619
   uint64_t entropy_bytes = sdith_signature_entropy_bytes(&SIGNATURE_PARAMS);
   uint64_t tmp_bytes = sdith_signature_tmp_bytes(&SIGNATURE_PARAMS);
-  uint8_t* entropy = OQS_MEM_malloc(entropy_bytes);
-  if (entropy == NULL) return OQS_ERROR;
-  uint8_t* tmp_space = OQS_MEM_malloc(tmp_bytes);
-  if (tmp_space == NULL) {
-    OQS_MEM_insecure_free(entropy);
+  oqs_sdith_workspace workspace;
+  if (oqs_sdith_workspace_acquire(&workspace, entropy_bytes, tmp_bytes) != OQS_SUCCESS) {
     return OQS_ERROR;
   }
 
-  OQS_randombytes(entropy, entropy_bytes);
-  sdith_sign(&SIGNATURE_PARAMS, signature, message, message_len, secret_key, entropy, tmp_space);
+  OQS_randombytes(workspace.entropy, workspace.entropy_len);
+  sdith_sign(&SIGNATURE_PARAMS, signature, message, message_len, secret_key, workspace.entropy, workspace.temporary);
   *signature_len = CRYPTO_BYTES;
 
-  // tmp_space and entropy hold secret signing state: wipe both.
-  OQS_MEM_secure_free(tmp_space, tmp_bytes);
-  OQS_MEM_secure_free(entropy, entropy_bytes);
+  oqs_sdith_workspace_release(&workspace);
   return OQS_SUCCESS;
 }
 
@@ -75,8 +68,8 @@ OQS_STATUS crypto_sign_verify(
 ) {
   if (signature_len != CRYPTO_BYTES) return OQS_ERROR;
   uint64_t tmp_bytes = sdith_verify_tmp_bytes(&SIGNATURE_PARAMS);
-  uint8_t* tmp_space = OQS_MEM_malloc(tmp_bytes);
-  if (tmp_space == NULL) return OQS_ERROR;
+  oqs_sdith_workspace workspace;
+  if (oqs_sdith_workspace_acquire(&workspace, 0, tmp_bytes) != OQS_SUCCESS) return OQS_ERROR;
 
   uint8_t res = sdith_verify(
     &SIGNATURE_PARAMS,
@@ -84,9 +77,9 @@ OQS_STATUS crypto_sign_verify(
     message,
     message_len,
     public_key,
-    tmp_space
+    workspace.temporary
   );
 
-  OQS_MEM_secure_free(tmp_space, tmp_bytes); // Touches only public data
+  oqs_sdith_workspace_release(&workspace);
   return res ? OQS_SUCCESS : OQS_ERROR;
 }
