@@ -8,14 +8,14 @@
 #include "sys.h"
 
 int main(void) {
-	uint8_t buffer[3] = {1, 2, 3};
+	uint8_t buffer[3] = { 1, 2, 3 };
 	MLD_CT_TESTING_SECRET(&buffer[1], 1);
 	if (__msan_test_shadow(&buffer[1], 1) != 0) {
 		puts("FAIL: classification did not poison the requested byte");
 		return 1;
 	}
 	if (__msan_test_shadow(&buffer[0], 1) != -1 ||
-	        __msan_test_shadow(&buffer[2], 1) != -1) {
+	    __msan_test_shadow(&buffer[2], 1) != -1) {
 		puts("FAIL: classification poisoned neighboring bytes");
 		return 2;
 	}
@@ -26,7 +26,7 @@ int main(void) {
 		return 3;
 	}
 	if (__msan_test_shadow(&buffer[0], 1) != 0 ||
-	        __msan_test_shadow(&buffer[2], 1) != 0) {
+	    __msan_test_shadow(&buffer[2], 1) != 0) {
 		puts("FAIL: declassification unpoisoned neighboring bytes");
 		return 4;
 	}
