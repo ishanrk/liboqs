@@ -54,6 +54,13 @@ The `local_testing_example.sh` script demonstrates how to use `ct_test.sh` to ru
 
 The `ct-tooling.yml` workflow also uses `ct_test.sh` to execute CT tests in CI on user-selected algorithms (via workflow inputs) when the workflow is manually triggered on GitHub Actions.
 
+The weekly ML-DSA job covers all six variants with GCC and Clang Valgrind-Varlat
+on `generic` and `haswell`. It sets the optional `memsan_generic_only` input
+to test portable C with MemorySanitizer, which does not instrument assembly.
+ML-DSA MemorySanitizer jobs first run a byte-range annotation regression check.
+The [ML-DSA triage report](triage/ml_dsa.md) records the warning analysis,
+compiler matrices, and native MemorySanitizer limitation.
+
 Note that Valgrind-Varlat and MemSan are alternative, mutually exclusive backends due to their architectural design: MemSan compiles with `clang -fsanitize=memory` and executes directly, whereas Valgrind compiles normally and executes inside the Valgrind VM. Running a MemSan-instrumented binary inside Valgrind is invalid due to shadow memory conflicts, so users will only ever enable one of them at a time.
 
 ### Configuration
