@@ -11,12 +11,21 @@ on:
         required: true
         type: string
         default: 'ML-KEM-512,ML-KEM-768,ML-KEM-1024'
+      memsan_generic_only:
+        description: 'Run MemorySanitizer only on portable C (assembly is not instrumented)'
+        required: false
+        type: boolean
+        default: false
         
   workflow_call:
     inputs:
       algorithms:
         required: true
         type: string
+      memsan_generic_only:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   resolve-matrix:
@@ -102,7 +111,7 @@ jobs:
       matrix:
         algorithm: ${{ fromJson(needs.resolve-matrix.outputs.matrix) }}
         compiler: [clang]
-        liboqs_build: [generic, auto]
+        liboqs_build: ${{ fromJson(inputs.memsan_generic_only && '["generic"]' || '["generic", "auto"]') }}
         opt_flag: [-O1, -O2, -O3, -Os, -Ofast, "-O2 -fno-vectorize", "-O3 -fno-vectorize"]
       max-parallel: 10
     steps:
@@ -111,6 +120,20 @@ jobs:
 
       - name: Install llvm-symbolizer
         run: apt-get update && apt-get install -y llvm
+
+      - name: Check ML-DSA MemorySanitizer annotations
+        if: startsWith(matrix.algorithm, 'ML-DSA-')
+        shell: bash
+        env:
+          OPT_FLAG: ${{ matrix.opt_flag }}
+        run: |
+          set -eu -o pipefail
+          read -r -a OPT_FLAGS <<< "$OPT_FLAG"
+          "${{ matrix.compiler }}" -fsanitize=memory "${OPT_FLAGS[@]}" -g -fno-pie -no-pie \
+            -Isrc/sig/ml_dsa/mldsa-native_ml-dsa-44_ref/mldsa/src \
+            tests/ct_tooling/test_mldsa_ct_annotations.c \
+            -o "$RUNNER_TEMP/test_mldsa_ct_annotations"
+          MSAN_OPTIONS=halt_on_error=1:exit_code=123 "$RUNNER_TEMP/test_mldsa_ct_annotations"
 
       - name: Run memsan tests
         shell: bash

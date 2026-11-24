@@ -39,6 +39,11 @@ It calls [platform tests](#platforms.yml), [code coverage tests](#code-coverage.
 
 This workflow is triggered by a weekly schedule.
 It calls [extended tests](#extended.yml), [scorecard analysis](#scorecard.yml), and [continuous benchmarking](#kem-bench.yml-sig-bench.yml)
+It also calls the constant-time compiler matrix in `ct-tooling.yml` for ML-KEM
+and ML-DSA. ML-DSA runs all six variants with Valgrind-Varlat on `generic` and
+`haswell`, and MemorySanitizer on `generic`, where the implementation is
+instrumented C. See [constant-time tooling](tests/ct_tooling/README.md) for
+the matrix, suppression rules, and local commands.
 
 #### <a name="release.yml"></a> Release workflow (`release.yml`)
 
