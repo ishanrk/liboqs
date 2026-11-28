@@ -530,6 +530,7 @@ cleanup:
 	OQS_SIG_free(sig);
 	return ret;
 }
+#endif
 
 #if defined(OQS_ENABLE_SIG_ml_dsa_44_extmu) || defined(OQS_ENABLE_SIG_ml_dsa_65_extmu) || defined(OQS_ENABLE_SIG_ml_dsa_87_extmu)
 /* signature verification external-MU APIs tests */
@@ -584,6 +585,7 @@ cleanup:
 }
 #endif
 
+#if defined(OQS_ENABLE_SIG_ml_dsa_44) || defined(OQS_ENABLE_SIG_ml_dsa_65) || defined(OQS_ENABLE_SIG_ml_dsa_87)
 /* signature verification prehash APIs with context tests */
 static int sig_ver_prehash_vector_ext(const char *method_name,
                                       const uint8_t *sigVer_pk_bytes,

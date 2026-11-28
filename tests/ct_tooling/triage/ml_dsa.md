@@ -89,16 +89,23 @@ on each base. The candidate passed the seven annotation settings and
 all six focused generic MSan runs. All six variants passed the focused
 unsuppressed Haswell Varlat run on both bases and the candidate.
 
-| Check | Configurations and cases |
-| --- | --- |
-| Generic MSan | 42 runs across six variants and seven Clang settings. |
-| Varlat | 192 runs across six variants, GCC and Clang, and `generic` and `haswell`. |
-| Ordinary signatures and KATs | 12 signature and six KAT passes across the two backends. The six extmu KAT cases were skipped. |
+The direct Linux tests on `b5682fe0` passed all of the following.
+
+| Check | Passed | Coverage |
+| --- | ---: | --- |
+| Generic MSan | 42/42 | Six variants across seven Clang settings. |
+| Valgrind-Varlat | 192/192 | Six variants with GCC and Clang on `generic` and `haswell`. |
+| Ordinary signatures | 12/12 | Six variants on both backends. |
+| Known-answer tests | 6/6 | Three standard variants on both backends. The six extmu KAT cases were skipped. |
 
 Varlat uses eight settings per compiler (`-O0`, `-O1`, `-O2`, `-O3`,
 `-Os`, `-Ofast`, and `-O2`/`-O3` with loop vectorization disabled).
 Generic MSan uses the same Clang flags except `-O0`. Select
 `memsan_generic_only` when dispatching the workflow for ML-DSA.
+
+In a separate Linux checkout with the `vectors_sig.c` guard fix, all three
+extmu variants passed representative runs through the workflow's `ct_test.sh`
+script with both MSan and Valgrind-Varlat. Hosted CI is pending.
 
 The CT harness exercises key generation and signing. Ordinary
 `test_sig` builds also exercise verification and negative tests, and
